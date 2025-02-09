@@ -1,4 +1,4 @@
-# 导入第三方包
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -61,7 +61,7 @@ def k_silhouette(X, clusters, ax, ok_k=3, title="k_silhouette"):
     ax.plot([ok_k, ok_k], [0, max(S)], color='red')
     plt.xlabel('clusters')
     plt.title(title, loc='left', ha='left', fontdict={'weight': 'bold', 'size': 16})
-    plt.ylabel('Contour coefficient')
+    plt.ylabel('Silhouette score')
     # 显示图形
     # ax.show()
 
@@ -155,6 +155,8 @@ if __name__ == '__main__':
     # 将三组数据集汇总到数据框中
     X = pd.DataFrame(np.concatenate([np.array([x1, y1]), np.array([x2, y2]), np.array([x3, y3])], axis=1).T)
     # 自定义函数的调用
-    k_SSE(X, 15)
+    k_SSE(X, 15, )
     # 自定义函数的调用
-    k_silhouette(X, 15)
+    ax = plt.gca()
+    k_silhouette(X, 15, ax, title='(d)',)
+    plt.show()
