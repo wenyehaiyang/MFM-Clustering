@@ -9,7 +9,7 @@ from kmodes.kprototypes import KPrototypes
 from 小楠楠论文绘图.k均值聚类k值确定 import k_SSE
 
 
-data = np.genfromtxt('OPEs.csv', delimiter=',', names=True)
+data = np.genfromtxt('OPEs1.csv', delimiter=',', names=True)
 print(data)
 data1=np.array([np.array([j for j in i]) for i in data])
 for r in data1.shape[0]:

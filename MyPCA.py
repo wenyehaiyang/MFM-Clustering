@@ -1,4 +1,5 @@
 import pandas as pd
+from matplotlib import gridspec
 from sklearn.cluster import KMeans, AgglomerativeClustering
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,9 +13,7 @@ plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']
 plt.rcParams['axes.unicode_minus'] = False
 
 
-
-def mfm_clustering_mean(ax, data, k, title="(a)"):
-    data_path = data
+def mfm_pca(ax, data, k, title="(a)"):
     data_pd = pd.read_csv(data)
     data = np.genfromtxt(data, delimiter=',', names=True)
     data1 = np.array([[j for j in list(i)[1:]] for i in data])
@@ -39,35 +38,40 @@ def mfm_clustering_mean(ax, data, k, title="(a)"):
     scaled = scaler.transform(data1)
     print(scaled)
     # Obtain principal components
-    pca = PCA(n_components=2)
+    pca = PCA(n_components=3)
     pc = pca.fit_transform(scaled)
     y_kmeans = kmeans.fit_predict(scaled)
+    loadings = pca.components_.T * 4  # 计算标准化载荷
     # y_kmeans = kmeans.fit_predict(pc)
     print(pc.shape, y_kmeans.shape)
     print(y_kmeans)
-    if title == "(b)" and data_path == "地中海西北部1_乘矩阵系数后.csv":
-        y_kmeans[3] = 2
-    print(y_kmeans)
     colors = ["red", "blue", "gray", "green", "purple", "black"]
+    # 获取载荷（主成分的方向）
+    # loadings = pca.components_.T  # 转置是为了方便绘图，因为我们通常需要按特征绘制，而不是按样本
+    print(loadings.shape[0])
+
     # 可视化结果
-    for i in range(1, k + 1):
-        color_n = colors[i - 1]
-        ax.scatter(pc[y_kmeans == (i - 1), 0], pc[y_kmeans == (i - 1), 1], s=50, c=color_n, label=f"source {i}")
-        confidence_ellipse(pc[y_kmeans == (i - 1), 0], pc[y_kmeans == (i - 1), 1], plt.gca(),
-                            n_std=2, edgecolor=color_n, linewidth=2)
+    ax.scatter(pc[:, 0], pc[:, 1], s=50, c=colors[1], label="Scores")
     texts = []
-    for i, label in enumerate(data_pd['name']):
-        # print(label, data1[i])
-        text = ax.text(
-            pc[i, 0], pc[i, 1],label,
-            # xytext=(2, 2),
-            # textcoords='offset points',
-            fontsize=8,
-            fontweight='normal',
-            color='black',
-            # bbox=dict(boxstyle='round,pad=0.5', fc='yellow', ec='k', alpha=0.7)
-        )
+    for i in range(len(data_pd["name"])):
+        text = ax.text(pc[i, 0], pc[i, 1], data_pd["name"][i], color=colors[1], fontsize=9)
         texts.append(text)
+    # 绘制载荷箭头
+    for i in range(loadings.shape[0]-2):  # 对于每个主成分
+        ax.arrow(0, 0, loadings[i, 0], loadings[i, 1], color=colors[0], head_width=0.03, head_length=0.05, label="Explanatory Plot")
+        text = ax.text(loadings[i, 0], loadings[i, 1], data_pd.columns.tolist()[1:][i], color=colors[0], fontsize=9)
+        texts.append(text)
+    '''for i in range(loadings.shape[0]-2, loadings.shape[0]):
+        ax.arrow(0, 0, loadings[i, 0], loadings[i, 1], label="Explanatory Plot")
+        text = ax.text(loadings[i, 0], loadings[i, 1], data_pd.columns.tolist()[1:][i], color=colors[3])
+        texts.append(text)'''
+    plt.ylim(-1, 1.4)
+    plt.xlabel(f'PC1 {round(pca.explained_variance_ratio_[0] * 100, 2)} %')
+    plt.ylabel(f'PC2 {round(pca.explained_variance_ratio_[1] * 100, 2)} %')
+    # ax.legend()
+    plt.title(title, loc='left', ha='left', fontdict={'weight': 'bold', 'size': 16})
+
+    # confidence_ellipse(pc[y_kmeans == (i - 1), 0], pc[y_kmeans == (i - 1), 1], plt.gca(), n_std=2, edgecolor=color_n, linewidth=2)
     adjust_text(texts, expand=(1.1, 1.6), arrowprops=dict(arrowstyle='->', color='red'))
 
     # centers = kmeans.cluster_centers_
@@ -77,3 +81,11 @@ def mfm_clustering_mean(ax, data, k, title="(a)"):
     plt.ylabel(f'PC2 {round(pca.explained_variance_ratio_[1] * 100, 2)} %')
     # ax.legend()
     plt.title(title, loc='left', ha='left', fontdict={'weight': 'bold', 'size': 16})
+
+
+if __name__ == '__main__':
+    plt.figure(figsize=(10, 6))
+    gs = gridspec.GridSpec(1, 1)
+    ax3 = plt.subplot(gs[0, 0])
+    mfm_pca(ax3, '采样点m.csv', 3, title="(a)")
+    plt.show()

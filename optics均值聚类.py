@@ -76,6 +76,17 @@ def mfm_clustering_optics(ax, data_path, title, x_lim, y_lim, min_samples=2, leg
                     # bbox=dict(boxstyle='round,pad=0.5', fc='yellow', ec='k', alpha=0.7)
                 )
                 texts.append(text)
+        if data_path != "OPEs1":
+            text = ax.text(
+                pc[i, 0], pc[i, 1], label,
+                # xytext=(2, 2),
+                # textcoords='offset points',
+                fontsize=8,
+                fontweight='normal',
+                color='black',
+                # bbox=dict(boxstyle='round,pad=0.5', fc='yellow', ec='k', alpha=0.7)
+            )
+            texts.append(text)
     plt.xlim(x_lim)
     plt.ylim(y_lim)
     adjust_text(texts, arrowprops=dict(arrowstyle='->', color='red'))
